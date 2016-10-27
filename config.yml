@@ -1,0 +1,35 @@
+# Your project's server will run on localhost:xxxx at this port
+PORT: 3000
+# Autoprefixer will make sure your CSS works with these browsers
+COMPATIBILITY:
+  - "last 2 versions"
+  - "ie >= 11"
+# UnCSS will use these settings
+UNCSS_OPTIONS:
+  html:
+    - "src/**/*.html"
+  # ignore:
+  #  - !!js/regexp ^\.is-.*
+
+# Gulp will reference these paths when it copies files
+PATHS:
+  # Path to dist folder
+  dist: "dist"  
+  # Paths to static assets that aren't images, CSS, or JavaScript
+  # assets:
+  #  - "src/assets/**/*"
+  #  - "!src/assets/{img,js,scss}/**/*"
+  # Fonts that should be copied to assets
+  fonts:
+    - "src/fonts/**/{*.woff,*.eot,*.woff2,*.svg,*.ttf}"
+  # Paths to Sass libraries, which can then be loaded with @import
+  sass:
+    files:
+      - "src/scss"
+    includes:
+      - "src/scss/includes"
+  # Paths to JavaScript libraries, which are compined into one file
+  javascript:
+    # Paths to your own project code are here
+    - "src/js/!(calculator).js"
+    - "src/js/**/*.js"
