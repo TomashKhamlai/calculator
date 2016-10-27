@@ -72,26 +72,6 @@ var Calculator = {};
         };
 
         this.evaluateExpression = function() {
-
-            var expression = self._expression,
-                definition = evaluate(expression);
-            self.setDefinition(definition);
-            // declaration and implementation of the supported operators
-            var operators = {
-                '+': function(x, y) {
-                    return x + y;
-                },
-                '-': function(x, y) {
-                    return x - y;
-                },
-                '×': function(x, y) {
-                    return x * y;
-                },
-                '÷': function(x, y) {
-                    return x / y;
-                }
-            };
-
             // add some helpers
             // return what Array.prototype.pop() returns
             // without changing of the array 
@@ -107,6 +87,26 @@ var Calculator = {};
                     return this.length === 0;
                 };
             }
+
+            var operators = {
+                    // declaration and implementation of the supported operators
+                    '+': function(x, y) {
+                        return x + y;
+                    },
+                    '-': function(x, y) {
+                        return x - y;
+                    },
+                    '×': function(x, y) {
+                        return x * y;
+                    },
+                    '÷': function(x, y) {
+                        return x / y;
+                    }
+                },
+                expression = self._expression,
+                definition = evaluate(expression);
+
+            self.setDefinition(definition);
             //addition("+") and substraction("-") have priority "1"
             //multiplication and substraction have priority "2"
             function getPriority(operand) {
@@ -292,7 +292,7 @@ var Calculator = {};
 
 
             action = getAction(keyCode);
-            console.log("action: ", action, " keyCode: ", keyCode);
+            // console.log("action: ", action, " keyCode: ", keyCode);
             value = String.fromCharCode(chrCode);
             //console.log("value: ", value);
             //};
@@ -349,15 +349,6 @@ var Calculator = {};
                 value = target.value;
 
             CaptureInput(evt, action, value);
-
-            // if (action in actions) {
-            //     actions[action](action, evt);
-            // }
-
-            // if (inputButtons.indexOf(value) > -1) {
-            console.log(value);
-            //     passInput(value);
-            // }
         }
     }
 
