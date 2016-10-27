@@ -77,10 +77,10 @@ function javascript(done) {
         .pipe($.jshint('.jshintrc'))
         //.pipe($.jscs())
         //.pipe($.stylish.combineWithHintResults())
-        //.pipe($.jshint.reporter('jshint-stylish'))
+        .pipe($.jshint.reporter('jshint-stylish'))
         .pipe($.concat('calculator.js'))
         //.pipe($.babel())
-        //.pipe($.uglify())
+        .pipe($.uglify())
         .pipe($.if(!PRODUCTION, $.sourcemaps.write()))
         .pipe(gulp.dest(PATHS.dist + '/js'));
 }

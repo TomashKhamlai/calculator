@@ -1,6 +1,7 @@
 var Calculator = {};
 
 (function(Calculator) {
+    "use strict";
 
     function Event(sender) {
         this._sender = sender;
@@ -35,8 +36,9 @@ var Calculator = {};
             // console.log(expression, ' ', definition);
             ob.expr = expression;
             ob.def = definition;
-            return defaults = ob;
-        })(this._expression, this._definition, defaults)
+            defaults = ob;
+            return defaults;
+        })(this._expression, this._definition, defaults);
 
         //methods
         this.resetExpression = function() {
@@ -44,7 +46,7 @@ var Calculator = {};
             // console.log(defaults.expr);
             //self._definition = defaults.def;
             self._expression = defaults.expr;
-        }
+        };
 
         this.setExpression = function(data) {
             // console.log("DATA: ", data);
@@ -53,11 +55,11 @@ var Calculator = {};
             if (data.operation && data.operation !== '=') {
                 operationSign = " " + data.operation + " ";
                 //console.log(operationSign);
-            };
+            }
             if (data.value) {
                 value = operationSign + data.value;
                 // console.log(value);
-            };
+            }
             self._expression += value;
             // console.log("SE: ", self._expression);
             self.expressionChanged.notify({});
@@ -67,9 +69,13 @@ var Calculator = {};
             self._definition = value.substring(0, 9);
             self.definitionChanged.notify({ value: value });
             self.resetExpression();
-        }
+        };
 
         this.evaluateExpression = function() {
+
+            var expression = self._expression,
+                definition = evaluate(expression);
+            self.setDefinition(definition);
             // declaration and implementation of the supported operators
             var operators = {
                 '+': function(x, y) {
@@ -93,13 +99,13 @@ var Calculator = {};
                 Array.prototype.last = function() {
                     return this[this.length - 1];
                 };
-            };
+            }
 
             //checks if array is inhabitant
             if (!Array.prototype.empty) {
                 Array.prototype.empty = function() {
                     return this.length === 0;
-                }
+                };
             }
             //addition("+") and substraction("-") have priority "1"
             //multiplication and substraction have priority "2"
@@ -141,9 +147,8 @@ var Calculator = {};
                 // console.log('len ', len);
 
                 for (var i = 0; i < len; i++) {
-                    index = exprArray.length - 1;
-                    // console.log('index: ', index);
                     var token = exprArray[i]; //token
+                    // console.log('index: ', index);
                     // console.log('token ', token);
                     if (token in operators) {
                         // console.log('token in operators');
@@ -152,7 +157,8 @@ var Calculator = {};
                         var curentOperation = token;
                         while (!operatorsStack.empty() &&
                             getPriority(operatorsStack.last()) >= getPriority(curentOperation)) {
-                            operate(operandsStack, operatorsStack.last()), operatorsStack.pop();
+                            operate(operandsStack, operatorsStack.last());
+                            operatorsStack.pop();
                             // console.log('operandsStack ', operandsStack);
                             // console.log('operatorsStack: ', operatorsStack);
                         }
@@ -167,7 +173,8 @@ var Calculator = {};
                 }
 
                 while (!operatorsStack.empty()) {
-                    operate(operandsStack, operatorsStack.last()), operatorsStack.pop();
+                    operate(operandsStack, operatorsStack.last());
+                    operatorsStack.pop();
                     // console.log('operandsStack ', operandsStack);
                     // console.log('operatorsStack: ', operatorsStack);
                 }
@@ -175,43 +182,40 @@ var Calculator = {};
                 return operandsStack.last();
             }
 
-            expression = self._expression;
-            definition = evaluate(expression);
-            self.setDefinition(definition);
-        }
+
+        };
     }
 
     function CalculatorView(model, ui) {
 
         var self = this,
             inputButtons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'],
-            inputKeys = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 8, 13, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 111, 106, 109, 107, 110],
             actions = {
-                "all-clear": function(act, ev) {
+                "all-clear": function(act) {
                     self.funcKeyPressed.notify({ action: act });
                 },
-                "clear-entry": function(act, ev) {
+                "clear-entry": function(act) {
                     self.funcKeyPressed.notify({ action: act });
                 },
                 "copy": function(act, ev) {
                     self.funcKeyPressed.notify({ action: act, evt: ev });
                 },
-                "change-sign": function(act, ev) {
+                "change-sign": function(act) {
                     self.funcKeyPressed.notify({ action: act });
                 },
-                "evaluate": function(act, ev) {
+                "evaluate": function(act) {
                     self.funcKeyPressed.notify({ action: act });
                 },
-                "add": function(act, ev) {
+                "add": function(act) {
                     self.funcKeyPressed.notify({ action: act });
                 },
-                "substract": function(act, ev) {
+                "substract": function(act) {
                     self.funcKeyPressed.notify({ action: act });
                 },
-                "multiply": function(act, ev) {
+                "multiply": function(act) {
                     self.funcKeyPressed.notify({ action: act });
                 },
-                "devide": function(act, ev) {
+                "devide": function(act) {
                     self.funcKeyPressed.notify({ action: act });
                 }
             };
@@ -227,11 +231,11 @@ var Calculator = {};
             self._input.value = data.definition;
         });
 
-        this._model.definitionChanged.attach(function(sender, args) {
-            self._input.value = args.value;
+        this._model.definitionChanged.attach(function(sender, data) {
+            self._input.value = data.value;
         });
 
-        this._model.expressionChanged.attach(function(sender, args) {
+        this._model.expressionChanged.attach(function() {
             //    console.log(args);
             self._input.value = "0";
         });
@@ -274,14 +278,19 @@ var Calculator = {};
             evt.preventDefault();
             evt.returValue = false;
             var keyCode = evt.keyCode,
+                chrCode = "",
                 action = "",
                 value = "";
 
-            if (evt.charCode != null) chrCode = evt.charCode;
-            else if (evt.which != null) chrCode = evt.which;
-            else if (evt.keyCode != null) chrCode = evt.keyCode;
+            if (evt.charCode !== null) {
+                chrCode = evt.charCode;
+            } else if (evt.which !== null) {
+                chrCode = evt.which;
+            } else if (evt.keyCode !== null) {
+                chrCode = evt.keyCode;
+            }
 
-            // if (inputKeys.indexOf(keyCode) > -1) {
+
             action = getAction(keyCode);
             console.log("action: ", action, " keyCode: ", keyCode);
             value = String.fromCharCode(chrCode);
@@ -294,32 +303,31 @@ var Calculator = {};
                     case 8: // 8
                         console.log('backspase pressed');
                         return "clear-entry";
-                        break;
+
                     case 13: // 13
                         // console.log('enter pressed');
                         return "evaluate";
-                        break;
+
                     case 42: // 106
                         // console.log('multiply pressed');
                         return "multiply";
-                        break;
+
                     case 43: // 107
                         // console.log('plus pressed');
                         return "add";
-                        break;
+
                     case 45: // 109
                         // console.log('minus pressed');
                         return "substract";
-                        break;
+
                         // 110
                     case 47: // 111
                         // console.log('devide pressed');
                         return "devide";
-                        break;
+
                     default:
                         // console.log('puted');
                         return "put";
-                        break;
                 }
             }
         }
@@ -389,6 +397,7 @@ var Calculator = {};
         //this["clear-enry"] = View.clearEntry();
         //this["all-clear"] = this.allClear();
         this._view.funcKeyPressed.attach(function(sender, args) {
+            var value, operation;
             //console.log('performed action: ', args.action);
             switch (args.action) {
                 case "all-clear":
@@ -407,35 +416,35 @@ var Calculator = {};
                     // console.log('copied');
                     break;
                 case "add":
-                    var operation = self._view._display.getAttribute("data-before") || "";
-                    var value = self._view._input.value;
+                    operation = self._view._display.getAttribute("data-before") || "";
+                    value = self._view._input.value;
                     self._model.setExpression({ operation: operation, value: value });
-                    self._view._display.setAttribute("data-before", "+")
+                    self._view._display.setAttribute("data-before", "+");
                     break;
                 case "substract":
-                    var operation = self._view._display.getAttribute("data-before") || "";
-                    var value = self._view._input.value;
+                    operation = self._view._display.getAttribute("data-before") || "";
+                    value = self._view._input.value;
                     self._model.setExpression({ operation: operation, value: value });
-                    self._view._display.setAttribute("data-before", "-")
+                    self._view._display.setAttribute("data-before", "-");
                     break;
                 case "multiply":
                     //console.log('self._view: ', self._view._input.value);
                     //console.log("data-before: ", self._view._display.getAttribute("data-before"));
-                    var operation = self._view._display.getAttribute("data-before") || "";
-                    var value = self._view._input.value;
+                    operation = self._view._display.getAttribute("data-before") || "";
+                    value = self._view._input.value;
                     self._model.setExpression({ operation: operation, value: value });
-                    self._view._display.setAttribute("data-before", "×")
+                    self._view._display.setAttribute("data-before", "×");
                     break;
                 case "devide":
-                    var operation = self._view._display.getAttribute("data-before") || "";
-                    var value = self._view._input.value;
+                    operation = self._view._display.getAttribute("data-before") || "";
+                    value = self._view._input.value;
                     self._model.setExpression({ operation: operation, value: value });
-                    self._view._display.setAttribute("data-before", "÷")
+                    self._view._display.setAttribute("data-before", "÷");
                     break;
                 case "evaluate":
-                    var operation = self._view._display.getAttribute("data-before") || "";
+                    operation = self._view._display.getAttribute("data-before") || "";
                     //console.log(operation);
-                    var value = self._view._input.value;
+                    value = self._view._input.value;
                     //console.log(value);
                     self._model.setExpression({ operation: operation, value: value });
                     self._model.evaluateExpression();
@@ -452,6 +461,6 @@ var Calculator = {};
         var model = new CalculatorModel(),
             view = new CalculatorView(model, "calculator"),
             controller = new CalculatorController(model, view);
-    }
+    };
 
 })(Calculator);
